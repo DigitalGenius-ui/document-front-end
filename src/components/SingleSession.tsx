@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { deleteSession, type typeSession } from "../libs/api";
+import { deleteSession, type typeSession } from "../api-calls/api";
 import { timeChange } from "../utils/date";
 import { SESSION_KEY } from "../config/APiClient";
 import queryClient from "../config/react-query";

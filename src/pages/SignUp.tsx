@@ -1,67 +1,71 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { signUpFn } from "../libs/api";
+import { signUpFn } from "../api-calls/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerValidSchemas } from "../validation/auth-validation";
+import type { z } from "zod";
+import FormError from "../utils/FormError";
+import useCreateData from "../hooks/useCreateData";
+import queryKeys from "../constant/query-keys";
+import { signUpInputs } from "../constant/Inputs";
+
+type registerInputType = z.infer<typeof registerValidSchemas>;
 
 const SignUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confPassword, setConfPassword] = useState("");
-
   const navigate = useNavigate();
 
   const {
-    mutate: handleRegister,
-    isPending,
-    isError,
-  } = useMutation({
-    mutationFn: async () => await signUpFn(email, password, confPassword),
-    onSuccess: () => {
-      navigate("/sign-in", { replace: true });
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerValidSchemas),
+    defaultValues: {
+      userName: "amir",
+      email: "amir@gmail.com",
+      password: "amir12345",
+      confirmPassword: "amir12345",
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleRegister();
+  const { submitForm, isPending } = useCreateData<registerInputType>({
+    key: [queryKeys.AUTH],
+    func: signUpFn,
+  });
+
+  const onSubmit = async (values: registerInputType) => {
+    await submitForm({
+      inputData: values,
+      dataMessage: "User is signed up!",
+    });
+
+    navigate("/sign-in", { replace: true });
   };
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="w-[20rem] border rounded-lg flex flex-col !p-2 text-center gap-3"
       >
         <h1>SignUp form</h1>
-        <p className="text-rose-600">
-          {isError && "Pleas fill all the fields"}
-        </p>
-        <input
-          type="email"
-          placeholder="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="!p-2 rounded-full border"
-        />
-        <input
-          type="password"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="!p-2 rounded-full border"
-        />
-        <input
-          type="password"
-          placeholder="confirm password"
-          value={confPassword}
-          onChange={(e) => setConfPassword(e.target.value)}
-          className="!p-2 rounded-full border"
-        />
+
+        {signUpInputs.map((input) => (
+          <div key={input.name}>
+            <input
+              {...input}
+              className="!p-2 rounded-sm border w-full outline-none"
+              {...register(input.name)}
+            />
+            <FormError name={input.name} errors={errors} />
+          </div>
+        ))}
+
         <button
           type="submit"
           className="bg-gray-500 !p-2 text-white cursor-pointer"
         >
-          {isPending ? "Loading..." : "Sign In"}
+          {isPending ? "Loading..." : "Sign Up"}
         </button>
         <Link to={"/sign-in"}>Sign in Here</Link>
       </form>

@@ -13,8 +13,16 @@ import {
 import { ToolBarButton } from "../../utils/ToolBarButton";
 import { type Editor } from "@tiptap/react";
 import { FontFamily, PostLink } from "./ManuallEditore";
+import { Button } from "@mui/material";
 
-const Toolbar = ({ editor }: { editor: Editor | null }) => {
+type ToolbarType = {
+  editor: Editor | null;
+  title: string;
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
+  isPending: boolean;
+};
+
+const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
   const sections: {
     lable: string;
     isActive?: boolean;
@@ -84,8 +92,15 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <section className="!py-2 shadow-sm flex items-center !px-2 bg-white">
-      <div className="!w-[80%] !mx-auto">
+      <div className="!w-[90%] !mx-auto flex items-center justify-between">
         <div className="flex items-center">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="outline-none !p-1 border border-gray-300"
+            type="text"
+            placeholder="Title..."
+          />
           {sections[0].map((item) => (
             <ToolBarButton key={item.lable} {...item} />
           ))}
@@ -97,6 +112,13 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
             <ToolBarButton key={item.lable} {...item} />
           ))}
         </div>
+        {isPending ? (
+          "Saving..."
+        ) : (
+          <Button variant="contained" size="small">
+            Publish
+          </Button>
+        )}
       </div>
     </section>
   );

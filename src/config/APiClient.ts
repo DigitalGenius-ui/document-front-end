@@ -42,6 +42,8 @@ API.interceptors.response.use(
         return Promise.reject({ status, ...data });
       }
     }
+
+    return Promise.reject(error);
   }
 );
 

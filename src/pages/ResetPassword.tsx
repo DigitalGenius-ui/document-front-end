@@ -1,11 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { resetPasswordFn } from "../libs/api";
+import { resetPasswordFn } from "../api-calls/api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import useCreateData from "../hooks/useCreateData";
+import queryKeys from "../constant/query-keys";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confPassword, setConfPassword] = useState("");
+
+  const [isError, setIsError] = useState("");
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -15,16 +18,24 @@ const ResetPassword = () => {
 
   const validLink = code && exp && exp > now;
 
-  const {
-    mutate: handleResetPassword,
-    isPending,
-    isError,
-  } = useMutation({
-    mutationFn: async () => await resetPasswordFn(password, code as string),
-    onSuccess: () => {
-      navigate("/sign-in", { replace: true });
-    },
+  const { submitForm, isPending } = useCreateData({
+    key: [queryKeys.AUTH],
+    func: resetPasswordFn,
   });
+
+  const codeString = code as string;
+
+  const handleSubmit = async () => {
+    if (!password || !confPassword) {
+      setIsError("Please fill the inputs!!");
+      return;
+    }
+    await submitForm({
+      inputData: { password, code: codeString },
+      dataMessage: "Password has been resetted!",
+    });
+    navigate("/sign-in", { replace: true });
+  };
   return (
     <div className="w-full h-screen flex items-center justify-center">
       <div className="w-[20rem] border rounded-lg ">
@@ -49,7 +60,7 @@ const ResetPassword = () => {
               className="!p-2 rounded-full border"
             />
             <button
-              onClick={() => handleResetPassword()}
+              onClick={handleSubmit}
               disabled={password !== confPassword}
               type="submit"
               className="bg-gray-500 !p-2 text-white cursor-pointer"

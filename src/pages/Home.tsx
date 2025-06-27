@@ -1,7 +1,13 @@
-import Document from "../components/Editor/Document";
+import Documents from "../components/Documents/Documents";
+import Header from "../components/Header/Header";
 
 const Home = () => {
-  return <Document />;
+  return (
+    <section>
+      <Header />
+      <Documents />
+    </section>
+  );
 };
 
 export default Home;

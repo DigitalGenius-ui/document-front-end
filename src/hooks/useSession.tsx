@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SESSION_KEY } from "../config/APiClient";
-import { getSession, type typeSession } from "../libs/api";
+import { getSession, type typeSession } from "../api-calls/api";
 
 const useSession = () => {
   const {

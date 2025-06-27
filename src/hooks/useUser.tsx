@@ -1,19 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { AUTH_KEY } from "../config/APiClient";
-import { getUser, type userApiType } from "../libs/api";
+import { createContext, useContext } from "react";
+import type { userApiType } from "../api-calls/api";
 
-const useUser = () => {
-  const {
-    data: user,
-    isPending,
-    isError,
-  } = useQuery<userApiType>({
-    queryKey: [AUTH_KEY],
-    queryFn: getUser,
-    staleTime: Infinity,
-  });
+interface userContext {
+  user: userApiType | undefined;
+}
 
-  return { user, isPending, isError };
-};
+export const Context = createContext<userContext>({} as userContext);
 
-export default useUser;
+export const useUser = () => useContext(Context);

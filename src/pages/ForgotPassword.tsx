@@ -1,28 +1,33 @@
 import { useState } from "react";
-import { forgotPasswordFn } from "../libs/api";
-import { useMutation } from "@tanstack/react-query";
+import { forgotPasswordFn } from "../api-calls/api";
+import useCreateData from "../hooks/useCreateData";
+import queryKeys from "../constant/query-keys";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  const {
-    mutate: handleForgotPassword,
-    isPending,
-    isError,
-  } = useMutation({
-    mutationFn: async () => await forgotPasswordFn(email),
-    onSuccess: () => {
-      setMessage("Reset link sent to your email.");
-    },
+  const { submitForm, isPending } = useCreateData({
+    key: [queryKeys.AUTH],
+    func: forgotPasswordFn,
   });
+
+  const handleSubmit = async () => {
+    if (!email) {
+      setMessage("Pleas fill the input");
+      return;
+    }
+    await submitForm({
+      inputData: email,
+      dataMessage: "Reset link sent to your email.",
+    });
+  };
   return (
     <div className="w-full h-screen flex items-center justify-center">
       <div className="w-[20rem] border rounded-lg flex flex-col !p-2 text-center gap-3">
         <h1>Forgot Password</h1>
         <p className="text-rose-600">
-          {isError && "Pleas fill all the fields"}
-          {message && <span className="text-green-600">{message}</span>}
+          {message && <span className="text-red-600">{message}</span>}
         </p>
         <input
           type="email"
@@ -32,7 +37,7 @@ const ForgotPassword = () => {
           className="!p-2 rounded-full border"
         />
         <button
-          onClick={() => handleForgotPassword()}
+          onClick={handleSubmit}
           type="submit"
           className="bg-gray-500 !p-2 text-white cursor-pointer"
         >

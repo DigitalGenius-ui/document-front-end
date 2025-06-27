@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import { Editor, EditorContent, useEditor } from "@tiptap/react";
@@ -13,13 +14,30 @@ import FontFamily from "@tiptap/extension-font-family";
 import Mention from "@tiptap/extension-mention";
 import Toolbar from "./Toolbar";
 import { suggestion } from "./suggestions";
-import { useState } from "react";
 import Placeholder from "@tiptap/extension-placeholder";
 
-const TextEditor = () => {
-  const [content, setContent] = useState<string>("");
+type EditorParams = {
+  content: string;
+  setContent: React.Dispatch<React.SetStateAction<string>>;
+  setMention: React.Dispatch<React.SetStateAction<string[]>>;
+  title: string;
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
+  isPending: boolean;
+};
+
+const TextEditor = ({
+  content,
+  setContent,
+  setMention,
+  title,
+  setTitle,
+  isPending,
+}: EditorParams) => {
   const editor = useEditor({
     extensions: [
+      Placeholder.configure({
+        placeholder: "Type something here...",
+      }),
       StarterKit,
       ImageResize,
       TaskItem.configure({
@@ -33,9 +51,6 @@ const TextEditor = () => {
       Underline,
       TextStyle,
       FontFamily,
-      Placeholder.configure({
-        placeholder: "Type something here...",
-      }),
       Mention.configure({
         HTMLAttributes: {
           class: "mention",
@@ -52,11 +67,44 @@ const TextEditor = () => {
     },
     onUpdate: ({ editor }: { editor: Editor }) => {
       setContent(editor.getHTML());
+      const doc = editor.getJSON();
+      const mentions: string[] = [];
+
+      type MentionNode = {
+        type?: string;
+        attrs?: {
+          id?: string;
+          label?: string;
+          class?: string;
+        };
+        content?: MentionNode[];
+      };
+      const findMentions = ({ type, attrs, content }: MentionNode) => {
+        if (type === "mention" && attrs?.id) {
+          mentions.push(attrs.id);
+        }
+        if (content) {
+          content.forEach(findMentions);
+        }
+      };
+      findMentions(doc);
+      setMention([...new Set(mentions)]);
     },
   });
+
+  useEffect(() => {
+    if (editor && content && content !== editor.getHTML()) {
+      editor?.commands.setContent(content, false);
+    }
+  }, [content, editor]);
   return (
     <>
-      <Toolbar editor={editor} />
+      <Toolbar
+        isPending={isPending}
+        title={title}
+        setTitle={setTitle}
+        editor={editor}
+      />
       <section className="!w-[816px] !mx-auto bg-white h-full shadow-md !my-2">
         <EditorContent editor={editor} />
       </section>

@@ -8,12 +8,16 @@
 }
 
 body {
-  color: white;
-  background-color: rgb(12, 11, 11);
+  background-color: rgb(232, 226, 226);
 }
 
 :root {
   --primary: oklch(60.662% 0.00007 271.152 / 0.356);
+}
+
+.container {
+  width: 80%;
+  margin: 0 auto;
 }
 
 .tiptap {
@@ -189,9 +193,9 @@ body {
   }
 
   /* placeholder style  */
-  .ProseMirror p.is-empty::before {
+  p.is-editor-empty:first-child::before {
+    color: gray;
     content: attr(data-placeholder);
-    color: #aaa;
     float: left;
     height: 0;
     pointer-events: none;

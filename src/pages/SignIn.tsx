@@ -1,51 +1,60 @@
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { signInFn } from "../libs/api";
+import { signInFn } from "../api-calls/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginValidSchemas } from "../validation/auth-validation";
+import type { z } from "zod";
+import { signInInputs } from "../constant/Inputs";
+import FormError from "../utils/FormError";
+import useCreateData from "../hooks/useCreateData";
+import queryKeys from "../constant/query-keys";
+
+type loginType = z.infer<typeof loginValidSchemas>;
 
 const SignIn = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const {
-    mutate: handleLogin,
-    isPending,
-    isError,
-  } = useMutation({
-    mutationFn: async () => await signInFn(email, password),
-    onSuccess: () => {
-      navigate("/", { replace: true });
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginValidSchemas),
+    defaultValues: {
+      email: "amir@gmail.com",
+      password: "amir12345",
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleLogin();
+  const { submitForm, isPending } = useCreateData<loginType>({
+    key: [queryKeys.USER],
+    func: ({ email, password }) => signInFn(email, password),
+  });
+
+  const onSubmit = async (values: loginType) => {
+    await submitForm({
+      inputData: values,
+      dataMessage: "User is loggedin!",
+    });
+    navigate("/", { replace: true });
   };
   return (
     <div className="w-full h-screen flex items-center justify-center">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="w-[20rem] border rounded-lg flex flex-col !p-2 text-center gap-3"
       >
         <h1>Sign form</h1>
-        <p className="text-rose-600">{isError && "Wrong email or password"}</p>
-        <input
-          type="email"
-          placeholder="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="!p-2 rounded-full border"
-        />
-        <input
-          type="password"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="!p-2 rounded-full border"
-        />
+        {signInInputs.map((input) => (
+          <div key={input.name}>
+            <input
+              {...input}
+              className="!p-2 rounded-sm border w-full outline-none"
+              {...register(input.name)}
+            />
+            <FormError name={input.name} errors={errors} />
+          </div>
+        ))}
         <button
           type="submit"
           className="bg-gray-500 !p-2 text-white cursor-pointer"
