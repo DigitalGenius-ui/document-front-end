@@ -15,6 +15,7 @@ import Mention from "@tiptap/extension-mention";
 import Toolbar from "./Toolbar";
 import { suggestion } from "./suggestions";
 import Placeholder from "@tiptap/extension-placeholder";
+import useAllUsers from "../../hooks/useAllUsers";
 
 type EditorParams = {
   content: string;
@@ -33,6 +34,10 @@ const TextEditor = ({
   setTitle,
   isPending,
 }: EditorParams) => {
+  const { allUsers } = useAllUsers();
+  const userNamesRef = React.useRef<string[]>([]);
+  userNamesRef.current = allUsers?.map((u) => u.userName) ?? [];
+
   const editor = useEditor({
     extensions: [
       Placeholder.configure({
@@ -55,7 +60,16 @@ const TextEditor = ({
         HTMLAttributes: {
           class: "mention",
         },
-        suggestion,
+        suggestion: {
+          items: ({ query }: { query: string }) => {
+            return userNamesRef.current
+              .filter((item) =>
+                item.toLowerCase().startsWith(query.toLowerCase())
+              )
+              .slice(0, 5);
+          },
+          ...suggestion,
+        },
       }),
     ],
     content,

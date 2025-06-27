@@ -14,6 +14,10 @@ import { ToolBarButton } from "../../utils/ToolBarButton";
 import { type Editor } from "@tiptap/react";
 import { FontFamily, PostLink } from "./ManuallEditore";
 import { Button } from "@mui/material";
+import useCreateData from "../../hooks/useCreateData";
+import queryKeys from "../../constant/query-keys";
+import { pulishDoc } from "../../api-calls/docuemnt-api";
+import { useNavigate, useParams } from "react-router-dom";
 
 type ToolbarType = {
   editor: Editor | null;
@@ -23,6 +27,22 @@ type ToolbarType = {
 };
 
 const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
+  const { id: documentId } = useParams();
+  const navigate = useNavigate();
+  const { submitForm, isPending: publishPending } = useCreateData({
+    key: [queryKeys.DOCUMENT],
+    func: pulishDoc,
+  });
+
+  const handlePublish = async () => {
+    if (!documentId) return;
+    await submitForm({
+      inputData: { documentId, visibility: "Public" },
+      dataMessage: "Document has been published!",
+    });
+    navigate("/", { replace: true });
+  };
+
   const sections: {
     lable: string;
     isActive?: boolean;
@@ -115,8 +135,8 @@ const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
         {isPending ? (
           "Saving..."
         ) : (
-          <Button variant="contained" size="small">
-            Publish
+          <Button onClick={handlePublish} variant="contained" size="small">
+            {publishPending ? "Publishing..." : "Publish"}
           </Button>
         )}
       </div>

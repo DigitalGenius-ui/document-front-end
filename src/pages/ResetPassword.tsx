@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { resetPasswordFn } from "../api-calls/api";
+import { resetPasswordFn } from "../api-calls/auth-api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useCreateData from "../hooks/useCreateData";
 import queryKeys from "../constant/query-keys";

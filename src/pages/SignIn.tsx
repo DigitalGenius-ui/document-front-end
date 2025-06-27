@@ -1,4 +1,4 @@
-import { signInFn } from "../api-calls/api";
+import { signInFn } from "../api-calls/auth-api";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,7 @@ const SignIn = () => {
       inputData: values,
       dataMessage: "User is loggedin!",
     });
-    navigate("/", { replace: true });
+    navigate("/");
   };
   return (
     <div className="w-full h-screen flex items-center justify-center">

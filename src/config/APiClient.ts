@@ -1,7 +1,5 @@
 import axios from "axios";
-import queryClient from "./react-query";
 import { UNAUTHORIZED } from "../constant/http";
-import { navigate } from "../utils/setNavigate";
 
 const options = {
   baseURL: import.meta.env.VITE_API_BASE_URL!,
@@ -32,14 +30,7 @@ API.interceptors.response.use(
         await tokenRefreshClient.get("/auth/refresh");
         await tokenRefreshClient(config);
       } catch (error) {
-        console.log(error);
-        queryClient.clear();
-        navigate("/sign-in", {
-          state: {
-            redirect: window.location.pathname,
-          },
-        });
-        return Promise.reject({ status, ...data });
+        return Promise.reject({ status, ...data, error });
       }
     }
 

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { verifyEmailFn } from "../api-calls/api";
+import { verifyEmailFn } from "../api-calls/auth-api";
 
 const VerifyEmailPage = () => {
   const { code } = useParams();

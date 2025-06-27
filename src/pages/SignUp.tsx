@@ -1,4 +1,4 @@
-import { signUpFn } from "../api-calls/api";
+import { signUpFn } from "../api-calls/auth-api";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +29,7 @@ const SignUp = () => {
   });
 
   const { submitForm, isPending } = useCreateData<registerInputType>({
-    key: [queryKeys.AUTH],
+    key: [queryKeys.USER],
     func: signUpFn,
   });
 
@@ -39,7 +39,7 @@ const SignUp = () => {
       dataMessage: "User is signed up!",
     });
 
-    navigate("/sign-in", { replace: true });
+    navigate("/");
   };
 
   return (

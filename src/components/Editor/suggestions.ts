@@ -8,11 +8,6 @@ type MentionListRef = {
 };
 
 export const suggestion = {
-  items: ({ query }: { query: string }) => {
-    return ["Lea Thompson", "Cyndi Lauper", "Tom Cruise", "Madonna"]
-      .filter((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-      .slice(0, 5);
-  },
   render: () => {
     let component: ReactRenderer<MentionListRef>;
     let popup: Instance[];
@@ -60,7 +55,6 @@ export const suggestion = {
       },
 
       onExit() {
-        popup[0].destroy();
         component.destroy();
       },
     };

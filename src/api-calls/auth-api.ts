@@ -56,9 +56,9 @@ export type typeSession = {
 };
 
 export const logOut = async (): Promise<userApiType> => API.get("auth/logout");
-export const getUser = async (): Promise<userApiType> => API.get("/user");
 
 export const getSession = async (): Promise<typeSession[]> =>
   API.get("/session");
+
 export const deleteSession = async (id: string): Promise<typeSession[]> =>
   API.delete(`/session/${id}`);

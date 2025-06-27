@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import API from "../config/APiClient";
 import type { createDocumentValidation } from "../validation/document-validation";
-import type { visibilityStatus } from "../constant/visibilty";
+import type { visibilityType } from "../constant/visibilty";
 
 type createDocumentType = z.infer<typeof createDocumentValidation>;
 
@@ -32,7 +32,7 @@ export type documentType = {
   title: string;
   updatedAt: Date;
   userId: string;
-  visibility: typeof visibilityStatus;
+  visibility: visibilityType;
 };
 
 export const getAllDocuments = async (): Promise<documentType[]> => {
@@ -43,4 +43,34 @@ export const getSingleDocuments = async (
   documentId: string | undefined
 ): Promise<documentType> => {
   return await API.get(`/document/getSingleDocument/${documentId}`);
+};
+
+type pulishDocTYpe = {
+  documentId: string;
+  visibility: string;
+};
+export const pulishDoc = async ({ documentId, visibility }: pulishDocTYpe) => {
+  const res = await API.post(`/document/publishDoc/${documentId}`, {
+    visibility,
+  });
+  return res;
+};
+
+type notification = {
+  id: string;
+  title: string;
+  mentionedUser: string;
+  documentId: string;
+  isOpen: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+export const getUserNotification = async (
+  userName: string | undefined
+): Promise<notification[]> => {
+  return await API.get(`/document/userNotification/${userName}`);
+};
+
+export const openNotification = async (documentId: string) => {
+  return await API.post(`/document/openNotification/${documentId}`);
 };

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { forgotPasswordFn } from "../api-calls/api";
+import { forgotPasswordFn } from "../api-calls/auth-api";
 import useCreateData from "../hooks/useCreateData";
 import queryKeys from "../constant/query-keys";
 

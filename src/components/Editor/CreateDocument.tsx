@@ -48,7 +48,7 @@ const CreateDocument = () => {
   );
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !content) return;
     if (content) {
       debouncedSave({
         title,

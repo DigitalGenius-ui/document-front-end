@@ -1,10 +1,5 @@
 // components/MentionList.tsx
-import React, {
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useImperativeHandle, useState } from "react";
 
 interface MentionListRef {
   onKeyDown: (args: { event: KeyboardEvent }) => boolean;
@@ -16,15 +11,8 @@ type MentionListProps = {
 };
 
 const MentionList = React.forwardRef<MentionListRef, MentionListProps>(
-  ({ items, command, query }, ref) => {
+  ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
-
-    const filteredItems = useMemo(() => {
-      if (!query.trim()) return [];
-      return items.filter((name) =>
-        name.toLowerCase().includes(query.toLowerCase())
-      );
-    }, [items, query]);
 
     const selectItem = (index: number) => {
       const item = items[index];
@@ -71,7 +59,7 @@ const MentionList = React.forwardRef<MentionListRef, MentionListProps>(
 
     return (
       <div className="dropdown-menu">
-        {filteredItems.map((item, index) => (
+        {items.map((item, index) => (
           <button
             key={index}
             className={index === selectedIndex ? "is-selected" : ""}
