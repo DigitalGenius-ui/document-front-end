@@ -5,8 +5,10 @@ import SignUp from "./pages/SignUp";
 import VerifyPage from "./pages/VerifyEmailPage";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
-import CreateDocument from "./components/Editor/CreateDocument";
 import { useUser } from "./hooks/useUser";
+import PreviewDocument from "./components/Documents/PreviewDocument";
+import TextEditor from "./components/Editor/TextEditor";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 function App() {
   const { user, isPending } = useUser();
@@ -16,7 +18,9 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/singleDocument/:id" element={<CreateDocument />} />
+      <Route path="/singleDocument/:id" element={<TextEditor />} />
+      <Route path="/previewDocument/:id" element={<PreviewDocument />} />
+      <Route path="/email/verify/:code" element={<VerifyEmailPage />} />
       {!user && (
         <>
           <Route path="/sign-in" element={<SignIn />} />

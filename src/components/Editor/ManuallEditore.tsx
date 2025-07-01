@@ -1,8 +1,10 @@
-import { ChevronDown, Link2Icon } from "lucide-react";
+import { Link2Icon } from "lucide-react";
 import { ToolBarButton } from "../../utils/ToolBarButton";
 import { type Editor } from "@tiptap/react";
 import { useState } from "react";
 import clsx from "clsx";
+import Select from "../../utils/Select";
+import type { Level } from "@tiptap/extension-heading";
 
 export const PostLink = ({ editor }: { editor: Editor | null }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -46,38 +48,86 @@ export const FontFamily = ({ editor }: { editor: Editor | null }) => {
   };
 
   return (
-    <section className="relative !mx-2">
-      <p
-        onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center justify-between w-[8rem] border 
-        border-gray-300 !py-0.5 !px-2 !text-sm cursor-pointer`}
-      >
-        <span className="!line-clamp-1">
-          {editor?.getAttributes("textStyle").fontFamily || "Arial"}
-        </span>
-        <ChevronDown className="size-3" />
-      </p>
-      {open && (
-        <div
-          className="flex flex-col items-start bg-white shadow-md absolute left-0 right-0 
-        -bottom-[9rem] z-10"
-        >
-          {fonts.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => handleClick(item.value)}
-              className={clsx(
-                "!p-1 w-full text-start cursor-pointer hover:bg-gray-200",
-                editor?.getAttributes("textStyle").fontFamily === item.value &&
-                  "bg-gray-300"
-              )}
-              style={{ fontFamily: item.value }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </section>
+    <Select
+      open={open}
+      setOpen={setOpen}
+      title={editor?.getAttributes("textStyle").fontFamily || "Arial"}
+    >
+      <>
+        {fonts.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => handleClick(item.value)}
+            className={clsx(
+              "!p-1 w-full text-start cursor-pointer hover:bg-gray-200 text-sm",
+              editor?.getAttributes("textStyle").fontFamily === item.value &&
+                "bg-gray-300"
+            )}
+            style={{ fontFamily: item.value }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </>
+    </Select>
+  );
+};
+
+// get headings
+export const Headings = ({ editor }: { editor: Editor | null }) => {
+  const [open, setOpen] = useState<boolean>(false);
+  const headings = [
+    { label: "Normal Text", level: 0, fontSize: "16px" },
+    { label: "Heading 1", level: 1, fontSize: "32px" },
+    { label: "Heading 2", level: 2, fontSize: "24px" },
+    { label: "Heading 3", level: 3, fontSize: "20px" },
+    { label: "Heading 4", level: 4, fontSize: "18px" },
+    { label: "Heading 5", level: 5, fontSize: "16px" },
+  ];
+
+  const currentHeading = () => {
+    for (let level = 1; level <= 5; level++) {
+      if (editor?.isActive("heading", { level })) {
+        return `Heading ${level}`;
+      }
+    }
+
+    return "Normal Text";
+  };
+
+  const handleClick = (level: number) => {
+    if (level === 0) {
+      editor?.chain().focus().setParagraph().run();
+    } else {
+      editor
+        ?.chain()
+        .focus()
+        .toggleHeading({ level: level as Level })
+        .run();
+    }
+    setOpen(false);
+  };
+
+  return (
+    <Select open={open} setOpen={setOpen} title={currentHeading()}>
+      <>
+        {headings.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => handleClick(item?.level)}
+            className={clsx(
+              "!p-1 w-full text-start cursor-pointer hover:bg-gray-200",
+
+              item.level === 0 ||
+                (editor?.isActive("heading", { level: item.level }) &&
+                  "bg-gray-300")
+            )}
+            style={{ fontSize: item.fontSize }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </>
+    </Select>
   );
 };

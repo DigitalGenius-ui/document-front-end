@@ -3,12 +3,16 @@ import type React from "react";
 
 type DropMenu = {
   open: HTMLElement | null;
-  handleClose: () => void;
-  children: React.ReactElement;
+  setOpen: (el: HTMLElement | null) => void;
+  children: React.ReactNode;
 };
 
-const DropMenu = ({ open, children, handleClose }: DropMenu) => {
+const DropMenu = ({ open, children, setOpen }: DropMenu) => {
   const anchorEl = Boolean(open);
+
+  const handleClose = () => {
+    setOpen(null);
+  };
   return (
     <Menu
       id="basic-menu"

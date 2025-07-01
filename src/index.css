@@ -182,10 +182,10 @@ body {
 
   /* mention compo  */
   .mention {
+    background-color: rgba(128, 0, 128, 0.111);
     border-radius: 0.4rem;
     box-decoration-break: clone;
-    color: blue;
-    text-decoration: underline;
+    color: purple;
     padding: 0.1rem 0.3rem;
     &::after {
       content: "\200B";

@@ -1,25 +1,30 @@
-import type { z } from "zod";
+import { z } from "zod";
 import API from "../config/APiClient";
-import type { createDocumentValidation } from "../validation/document-validation";
 import type { visibilityType } from "../constant/visibilty";
+import type { documentValidation } from "../validation/document-validation";
 
-type createDocumentType = z.infer<typeof createDocumentValidation>;
+type createDocumentType = z.infer<typeof documentValidation>;
 
-export const createDocuemnt = async (data: createDocumentType) => {
-  const res = await API.post("/document/createDocument", data);
-  return res;
-};
-
-export const updatedDoc = async (data: {
-  documentId: string;
-  visibility: string;
-}) => {
+export const createDocument = async (data: createDocumentType) => {
   const res = await API.post("/document/createDocument", data);
   return res;
 };
 
 export const removeDoc = async (documentId: string) => {
   const res = await API.post(`/document/removeDocument/${documentId}`);
+  return res;
+};
+
+type updateDocument = {
+  title?: string;
+  content?: string;
+  mentions?: string[];
+  documentId: string;
+  visibility?: string | "Public" | "Private" | "Draft";
+};
+
+export const updateDoc = async (data: updateDocument) => {
+  const res = await API.post(`/document/updateDoc`, data);
   return res;
 };
 
@@ -33,6 +38,11 @@ export type documentType = {
   updatedAt: Date;
   userId: string;
   visibility: visibilityType;
+  user: {
+    email: string;
+    id: string;
+    userName: string;
+  };
 };
 
 export const getAllDocuments = async (): Promise<documentType[]> => {
@@ -43,17 +53,6 @@ export const getSingleDocuments = async (
   documentId: string | undefined
 ): Promise<documentType> => {
   return await API.get(`/document/getSingleDocument/${documentId}`);
-};
-
-type pulishDocTYpe = {
-  documentId: string;
-  visibility: string;
-};
-export const pulishDoc = async ({ documentId, visibility }: pulishDocTYpe) => {
-  const res = await API.post(`/document/publishDoc/${documentId}`, {
-    visibility,
-  });
-  return res;
 };
 
 type notification = {

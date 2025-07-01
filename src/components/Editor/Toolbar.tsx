@@ -12,12 +12,12 @@ import {
 } from "lucide-react";
 import { ToolBarButton } from "../../utils/ToolBarButton";
 import { type Editor } from "@tiptap/react";
-import { FontFamily, PostLink } from "./ManuallEditore";
+import { FontFamily, Headings, PostLink } from "./ManuallEditore";
 import { Button } from "@mui/material";
 import useCreateData from "../../hooks/useCreateData";
 import queryKeys from "../../constant/query-keys";
-import { pulishDoc } from "../../api-calls/docuemnt-api";
 import { useNavigate, useParams } from "react-router-dom";
+import { updateDoc } from "../../api-calls/docuemnt-api";
 
 type ToolbarType = {
   editor: Editor | null;
@@ -31,7 +31,7 @@ const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
   const navigate = useNavigate();
   const { submitForm, isPending: publishPending } = useCreateData({
     key: [queryKeys.DOCUMENT],
-    func: pulishDoc,
+    func: updateDoc,
   });
 
   const handlePublish = async () => {
@@ -111,7 +111,7 @@ const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
   ];
 
   return (
-    <section className="!py-2 shadow-sm flex items-center !px-2 bg-white">
+    <section className="!py-2 shadow-sm flex items-center !px-2 bg-white !mb-4">
       <div className="!w-[90%] !mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <input
@@ -131,6 +131,7 @@ const Toolbar = ({ editor, setTitle, title, isPending }: ToolbarType) => {
           {sections[1].map((item) => (
             <ToolBarButton key={item.lable} {...item} />
           ))}
+          <Headings editor={editor} />
         </div>
         {isPending ? (
           "Saving..."

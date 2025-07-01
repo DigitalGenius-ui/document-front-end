@@ -19,6 +19,11 @@ export const verifyEmailFn = async (code: string) => {
   return data;
 };
 
+export const sendVerifyCode = async (email: string | undefined) => {
+  const data = await API.post(`/auth/sendVerifyCode`, { email });
+  return data;
+};
+
 export const forgotPasswordFn = async (email: string) => {
   const data = await API.post("/auth/password/forgot", { email });
   return data;

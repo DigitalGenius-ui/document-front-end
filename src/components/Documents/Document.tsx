@@ -4,24 +4,28 @@ import { visibilityStatus } from "../../constant/visibilty";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import {
-  pulishDoc,
   removeDoc,
+  updateDoc,
   type documentType,
 } from "../../api-calls/docuemnt-api";
 import useCreateData from "../../hooks/useCreateData";
 import queryKeys from "../../constant/query-keys";
+import { useUser } from "../../hooks/useUser";
+import clsx from "clsx";
 
 type docType = documentType & {
   user: { email: string; id: string; userName: string };
 };
 
 const Document = ({ doc }: { doc: docType }) => {
-  const [edit, setEdit] = useState<boolean>(false);
-  const [visibility, setVisibilty] = useState<string>("");
+  const { user } = useUser();
+  const [edit, setEdit] = useState<string | null>(null);
+  const [visibility, setVisibilty] = useState("");
+  const [newTitle, setNewTitle] = useState<string>("Untitled");
 
   const { submitForm: updateData, isPending: updatePending } = useCreateData({
     key: [queryKeys.DOCUMENT],
-    func: pulishDoc,
+    func: updateDoc,
   });
 
   const { submitForm: remove, isPending: removePending } = useCreateData({
@@ -30,15 +34,19 @@ const Document = ({ doc }: { doc: docType }) => {
   });
 
   const handleEdit = async () => {
-    if (edit) {
+    if (edit === doc.documentId) {
       await updateData({
-        inputData: { visibility, documentId: doc.documentId },
+        inputData: {
+          documentId: doc.documentId,
+          title: newTitle,
+          visibility,
+        },
         dataMessage: "Document has been updated!!",
       });
-      setEdit(false);
+      setEdit(null);
       return;
     } else {
-      setEdit(true);
+      setEdit(doc.documentId);
     }
   };
 
@@ -50,51 +58,73 @@ const Document = ({ doc }: { doc: docType }) => {
   };
 
   useEffect(() => {
-    if (doc.visibility) {
+    if (doc) {
       setVisibilty(doc.visibility);
+      setNewTitle(doc.title);
     }
   }, [doc]);
+
+  const isUserMatch = user?.id === doc.userId;
+
+  const openLink = isUserMatch
+    ? `/singleDocument/${doc?.documentId}`
+    : `/previewDocument/${doc.documentId}`;
+
+  const visibilityColor = {
+    Public: "bg-green-500",
+    Draft: "bg-gray-500",
+    Private: "bg-yellow-500",
+  };
+
   return (
-    <div className="bg-white !p-3 shadow-md !rounded-sm relative">
-      <div className="!absolute !top-3 !right-3 !text-sm mb-5 !space-x-2">
-        {edit && (
+    <div
+      className={clsx(
+        `bg-white !p-3 shadow-md !rounded-sm relative`,
+        doc?.visibility === "Draft" && "opacity-50 hover:opacity-100"
+      )}
+    >
+      {isUserMatch && (
+        <div className="!absolute !top-3 !right-3 !text-sm mb-5 !space-x-2">
+          {edit === doc?.documentId && (
+            <Button
+              size="small"
+              variant="contained"
+              color="error"
+              onClick={handleRemove}
+            >
+              {removePending ? "Removing..." : "Delete"}
+            </Button>
+          )}
           <Button
             size="small"
             variant="contained"
-            color="error"
-            onClick={handleRemove}
+            color="info"
+            onClick={handleEdit}
           >
-            {removePending ? "Removing..." : "Delete"}
+            {edit !== null ? (updatePending ? "Editing..." : "Save") : "Edit"}
           </Button>
-        )}
-        <Button
-          size="small"
-          variant="contained"
-          color="info"
-          onClick={handleEdit}
+        </div>
+      )}
+      {isUserMatch && edit === doc.documentId ? (
+        <input
+          placeholder="Title..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className="border border-gray-400 !p-1 text-sm outline-none"
+        />
+      ) : (
+        <Link
+          to={openLink}
+          className="!max-w-fit text-xl line-clamp-2 text-gray-700 hover:text-blue-600"
         >
-          {edit ? (updatePending ? "Editing..." : "Save") : "Edit"}
-        </Button>
-      </div>
-      <Link to={`/singleDocument/${doc?.documentId}`}>
-        <h1 className="text-xl line-clamp-2 text-gray-700 hover:text-blue-600">
-          {doc?.title !== "" ? (
-            doc?.title
-          ) : (
-            <div
-              className="line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: doc.content }}
-            />
-          )}
-        </h1>
-      </Link>
+          {doc?.title}
+        </Link>
+      )}
       <div className="flex items-center justify-between !pt-10 !text-sm text-gray-600">
         <p>@{doc.user.userName}</p>
         <div className="flex items-center gap-2">
-          <p>{moment().format("LL")}</p>
-          {!edit ? (
-            <p>{doc?.visibility}</p>
-          ) : (
+          <p>Last Modified : {moment(doc.updatedAt).fromNow()}</p>
+          {isUserMatch && edit === doc.documentId ? (
             <select
               value={visibility}
               onChange={(e) => setVisibilty(e.target.value)}
@@ -104,6 +134,16 @@ const Document = ({ doc }: { doc: docType }) => {
                 <option key={item}>{item}</option>
               ))}
             </select>
+          ) : (
+            <p className="relative">
+              {doc?.visibility}
+              <span
+                className={clsx(
+                  `block !w-[7px] !h-[7px] rounded-full absolute top-0 -right-1
+                  ${visibilityColor[doc.visibility]}`
+                )}
+              />
+            </p>
           )}
         </div>
       </div>

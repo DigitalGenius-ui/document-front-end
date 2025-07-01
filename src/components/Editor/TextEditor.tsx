@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import { Editor, EditorContent, useEditor } from "@tiptap/react";
@@ -16,27 +16,63 @@ import Toolbar from "./Toolbar";
 import { suggestion } from "./suggestions";
 import Placeholder from "@tiptap/extension-placeholder";
 import useAllUsers from "../../hooks/useAllUsers";
+import useCreateData from "../../hooks/useCreateData";
+import queryKeys from "../../constant/query-keys";
+import { createDocument } from "../../api-calls/docuemnt-api";
+import { useParams } from "react-router-dom";
+import useSingleDoc from "../../hooks/useSingleDoc";
+import { useDebouncedCallback } from "use-debounce";
+import type { documentValidation } from "../../validation/document-validation";
+import type { z } from "zod";
 
-type EditorParams = {
-  content: string;
-  setContent: React.Dispatch<React.SetStateAction<string>>;
-  setMention: React.Dispatch<React.SetStateAction<string[]>>;
-  title: string;
-  setTitle: React.Dispatch<React.SetStateAction<string>>;
-  isPending: boolean;
-};
-
-const TextEditor = ({
-  content,
-  setContent,
-  setMention,
-  title,
-  setTitle,
-  isPending,
-}: EditorParams) => {
+const TextEditor = () => {
+  // display the mentioned users
   const { allUsers } = useAllUsers();
   const userNamesRef = React.useRef<string[]>([]);
   userNamesRef.current = allUsers?.map((u) => u.userName) ?? [];
+
+  const [title, setTitle] = useState<string>("Untitled");
+  const [content, setContent] = useState<string>("");
+  const [mention, setMention] = useState<string[]>([]);
+
+  // update the document
+  const { submitForm, isPending } = useCreateData({
+    key: [queryKeys.DOCUMENT],
+    func: createDocument,
+  });
+
+  const { id } = useParams();
+
+  const { doc } = useSingleDoc(id);
+
+  useEffect(() => {
+    if (doc) {
+      setContent(doc?.content || "");
+      setTitle(doc?.title || "Untiltled");
+    }
+  }, [doc]);
+
+  const debouncedSave = useDebouncedCallback(
+    async (value: z.infer<typeof documentValidation>) => {
+      await submitForm({
+        inputData: value,
+        dataMessage: "",
+      });
+    },
+    1000
+  );
+
+  useEffect(() => {
+    if (!id || !content) return;
+    if (content) {
+      debouncedSave({
+        title,
+        content,
+        mentions: mention,
+        documentId: id,
+      });
+    }
+  }, [title, content, mention, debouncedSave, id]);
 
   const editor = useEditor({
     extensions: [
@@ -106,11 +142,13 @@ const TextEditor = ({
     },
   });
 
+  // replaced the saved document to the editor.
   useEffect(() => {
     if (editor && content && content !== editor.getHTML()) {
       editor?.commands.setContent(content, false);
     }
   }, [content, editor]);
+
   return (
     <>
       <Toolbar
@@ -119,7 +157,7 @@ const TextEditor = ({
         setTitle={setTitle}
         editor={editor}
       />
-      <section className="!w-[816px] !mx-auto bg-white h-full shadow-md !my-2">
+      <section className="!w-[816px] !mx-auto bg-white h-full shadow-md">
         <EditorContent editor={editor} />
       </section>
     </>

@@ -1,6 +1,6 @@
-import { IconButton, Badge, MenuItem, Menu } from "@mui/material";
+import { IconButton, Badge, MenuItem } from "@mui/material";
 import { Bell } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import queryKeys from "../../constant/query-keys";
 import {
@@ -12,12 +12,24 @@ import moment from "moment";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
 import useCreateData from "../../hooks/useCreateData";
+import { socket } from "../../config/socket.io";
+import queryClient from "../../config/react-query";
+import DropMenu from "../../utils/DropMenu";
+
+type notificationType = {
+  createdAt: Date;
+  documentId: string;
+  id: string;
+  isOpen: boolean;
+  mentionedUser: string;
+  title: string;
+  updatedAt: Date;
+};
 
 const Notification = () => {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState<null | HTMLElement>(null);
-  const anchorEl = Boolean(open);
   const { user } = useUser();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -38,15 +50,35 @@ const Notification = () => {
     func: openNotification,
   });
 
-  const handleClose = () => {
-    setOpen(null);
-  };
-
   const itemClick = async (docId: string) => {
     await submitForm({ inputData: docId, dataMessage: "" });
-    navigate(`/singleDocument/${docId}`);
-    handleClose();
+    navigate(`/previewDocument/${docId}`);
   };
+
+  useEffect(() => {
+    const handleNotify = (data: notificationType) => {
+      queryClient.setQueryData(
+        [queryKeys.NOTIFY],
+        (old: notificationType[] | undefined) => [...(old ?? []), data]
+      );
+    };
+
+    const handleNotifyRemove = (message: string) => {
+      if (message) {
+        queryClient.invalidateQueries({ queryKey: [queryKeys.NOTIFY] });
+        queryClient.invalidateQueries({ queryKey: [queryKeys.DOCUMENT] });
+      }
+    };
+
+    socket.on("notify", handleNotify);
+    socket.on("removeNotify", handleNotifyRemove);
+
+    return () => {
+      socket.off("notify", handleNotify);
+      socket.off("removeNotify", handleNotify);
+    };
+  }, []);
+
   return (
     <>
       <Badge badgeContent={unOpenNotifications?.length} color="primary">
@@ -55,16 +87,7 @@ const Notification = () => {
         </IconButton>
       </Badge>
 
-      <Menu
-        anchorEl={open}
-        open={anchorEl}
-        onClose={handleClose}
-        slotProps={{
-          list: {
-            "aria-labelledby": "basic-button",
-          },
-        }}
-      >
+      <DropMenu open={open} setOpen={setOpen}>
         {data && data?.length > 0 ? (
           data?.map((item) => (
             <MenuItem
@@ -78,7 +101,7 @@ const Notification = () => {
               <div className={clsx("text-sm !space-y-2")}>
                 <p>{item.title}</p>
                 <span className="!block !text-end text-[10px]">
-                  {moment(item.updatedAt).format("LL")}
+                  {moment(item.createdAt).fromNow()}
                 </span>
               </div>
             </MenuItem>
@@ -86,7 +109,7 @@ const Notification = () => {
         ) : (
           <MenuItem disabled>No notification is detected!</MenuItem>
         )}
-      </Menu>
+      </DropMenu>
     </>
   );
 };

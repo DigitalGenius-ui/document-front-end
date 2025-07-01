@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createDocumentValidation = z.object({
+export const documentValidation = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
   mentions: z.string().array().optional(),
