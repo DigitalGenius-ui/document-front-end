@@ -1,54 +1,48 @@
-# React + TypeScript + Vite
+# 📄 Frigga.cloud Document Collaboration App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> An end‑to‑end assignment project for **Frigga.cloud** that delivers real‑time, collaborative document editing powered by **React 19**, **Express/Node**, **MySQL**, **Socket.io**, and a modern TypeScript front end.  
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&style=flat)
+![Tailwind](https://img.shields.io/badge/TailwindCSS-4.0-38B2AC?logo=tailwindcss&style=flat)
+![Express](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&style=flat)
+![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?logo=mysql&style=flat)
+![Socket.io](https://img.shields.io/badge/Socket.io-4.x-010101?logo=socket.io&style=flat)
+![License](https://img.shields.io/github/license/yourname/frigga-docs)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+## Core Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| # | Feature | Tech Highlights |
+|---|---------|-----------------|
+| 1 | **Auth** – sign‑up, sign‑in, JWT refresh, forgot‑password (email reset via **Resend**) | `jsonwebtoken`, `bcrypt` |
+| 2 | **Rich‑Text Docs** – create, edit, format, save drafts | **Tiptap** editor + Zod schema validation |
+| 3 | **Mentions & Tags** – @mention teammates inside any doc | Tiptap suggestion extension |
+| 4 | **Real‑Time Presence & Notifications** | **Socket.io** channels, optimistic UI with React‑Query |
+| 5 | **Instant Updates** – edits broadcast to all collaborators | WebSocket events, selective patching |
+| 6 | **Responsive UI** — dark mode, mobile‑first design | **Tailwind v4** + CSS variables |
+| 7 | **API & DB** — RESTful endpoints, relational data | **Express**, **Sequelize**, **MySQL 8** |
+| 8 | **Testing & Linting** – confidence for prod hand‑off | Vitest / Jest, ESLint + Prettier |
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Layer | Libraries / Tools | Notes |
+|-------|-------------------|-------|
+| **Front‑end** | React 19 · TypeScript · Tailwind v4 · Vite · Tiptap · TanStack / React‑Query · Zod | Concurrent UI, optimistic updates |
+| **Back‑end** | Node 18 · Express 4 · Sequelize · MySQL 8 · Socket.io · JsonWebToken | Scalable REST + WebSocket APIs |
+| **Email** | **Resend** | Transactional password‑reset links | Recieving user verifications links |
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+
+## Getting Started
+
+> **Prerequisites**: Node ≥ 18, pnpm 8, Docker (for MySQL), and a `.env` file (see below).
+
+```bash
+# 1 — Clone front-end 
+https://github.com/DigitalGenius-ui/document-front-end.git
+
+```bash
+# 1 — Clone back-end 
+https://github.com/DigitalGenius-ui/document-backend.git
